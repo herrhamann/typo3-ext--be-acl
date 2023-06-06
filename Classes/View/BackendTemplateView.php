@@ -1,4 +1,5 @@
 <?php
+
 namespace JBartels\BeAcl\View;
 
 /***************************************************************
@@ -29,7 +30,6 @@ namespace JBartels\BeAcl\View;
  */
 class BackendTemplateView extends \TYPO3\CMS\Backend\View\BackendTemplateView
 {
-
     /**
      * Resolves the template root to be used inside other paths. Defaults to template view.
      * @see \TYPO3\CMS\Fluid\View\TemplateView::getTemplateRootPaths()
@@ -45,8 +45,6 @@ class BackendTemplateView extends \TYPO3\CMS\Backend\View\BackendTemplateView
      * Set the root path(s) to the templates.
      * If set, overrides the one determined from $this->templateRootPathPattern
      * @see \TYPO3\CMS\Fluid\View\TemplateView::setTemplateRootPaths()
-     *
-     * @return void
      */
     public function setTemplateRootPaths(array $templateRootPaths)
     {
@@ -68,12 +66,9 @@ class BackendTemplateView extends \TYPO3\CMS\Backend\View\BackendTemplateView
      * Set the root path(s) to the partials.
      * If set, overrides the one determined from $this->partialRootPathPattern
      * @see \TYPO3\CMS\Fluid\View\TemplateView::setPartialRootPaths()
-     *
-     * @return void
      */
     public function setPartialRootPaths(array $partialRootPaths)
     {
         $this->templateView->setPartialRootPaths($partialRootPaths);
     }
-
 }

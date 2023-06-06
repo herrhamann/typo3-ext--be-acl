@@ -1,28 +1,27 @@
 <?php
 
 $EM_CONF['be_acl'] = [
-	'title' => 'Backend ACLs',
-	'description' => 'Backend Access Control Lists',
-	'category' => 'be',
-	'version' => '2.0.3-dev',
-	'state' => 'stable',
-	'clearcacheonload' => false,
-	'author' => 'Sebastian Kurfuerst, Jan Bartels, Moritz Ngo',
-	'author_email' => 'sebastian@garbage-group.de, j.bartels@arcor.de, moritz.ngo@p2media.de',
-	'author_company' => '',
-	'constraints' => [
-		'depends' => [
-			'typo3' => '11.5.0-11.5.99',
-		],
-		'conflicts' => [
-		],
-		'suggests' => [
-		],
-	],
-	'autoload' => [
-		'psr-4' => [
-		  	'JBartels\\BeAcl\\' => 'Classes/',
-			'P2Media\\BeAcl\\' => 'Classes/',
-		]
-	],
+    'title' => 'Backend ACLs',
+    'description' => 'Backend Access Control Lists',
+    'category' => 'be',
+    'version' => '2.0.3-dev',
+    'state' => 'stable',
+    'author' => 'Sebastian Kurfuerst, Jan Bartels, Moritz Ngo',
+    'author_email' => 'sebastian@garbage-group.de, j.bartels@arcor.de, moritz.ngo@p2media.de',
+    'author_company' => '',
+    'constraints' => [
+        'depends' => [
+            'typo3' => '11.5.0-11.5.99',
+        ],
+        'conflicts' => [
+        ],
+        'suggests' => [
+        ],
+    ],
+    'autoload' => [
+        'psr-4' => [
+            'JBartels\\BeAcl\\' => 'Classes/',
+            'P2Media\\BeAcl\\' => 'Classes/',
+        ],
+    ],
 ];

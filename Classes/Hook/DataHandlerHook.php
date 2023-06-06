@@ -1,6 +1,8 @@
 <?php
+
 namespace JBartels\BeAcl\Hook;
 
+use JBartels\BeAcl\Cache\PermissionCache;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
@@ -35,7 +37,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class DataHandlerHook
 {
-
     /**
      * This hook is called when a record is added or edited.
      * When a new page is created or a tx_beacl_acl record is changed
@@ -46,12 +47,10 @@ class DataHandlerHook
      * @param mixed $recordId The record's uid for update records, a string to look the record's uid up after it has
      *     been created.
      * @param array $updatedFields Array of changed fiels and their new values.
-     * @param \TYPO3\CMS\Core\DataHandling\DataHandler $tceMain TCEmain parent object.
-     * @return void
+     * @param DataHandler $tceMain TCEmain parent object.
      */
-    public function processDatamap_afterDatabaseOperations($status, $table, $recordId, $updatedFields, $tceMain)
+    public function processDatamap_afterDatabaseOperations($status, $table, mixed $recordId, $updatedFields, $tceMain)
     {
-
         // When a new page is created we update the permission timestamp
         // in the cache so that all Backend users recalculate their
         // permissions.
@@ -74,8 +73,7 @@ class DataHandlerHook
      * @param string $table The record's table.
      * @param integer $recordId The record's uid.
      * @param array $commandValue The commands value, typically an array with more detailed command information.
-     * @param \TYPO3\CMS\Core\DataHandling\DataHandler $tceMain The TCEmain parent object.
-     * @return void
+     * @param DataHandler $tceMain The TCEmain parent object.
      */
     public function processCmdmap_postProcess(
         $command,
@@ -84,7 +82,6 @@ class DataHandlerHook
         $commandValue,
         DataHandler $tceMain
     ) {
-
         // This is required to take care of deleted ACLs.
         if ($table == 'tx_beacl_acl') {
             $this->flushPermissionCache();
@@ -96,8 +93,8 @@ class DataHandlerHook
      */
     protected function flushPermissionCache()
     {
-        /** @var \JBartels\BeAcl\Cache\PermissionCache $permissionCache */
-        $permissionCache = GeneralUtility::makeInstance('JBartels\\BeAcl\\Cache\\PermissionCache');
+        /** @var PermissionCache $permissionCache */
+        $permissionCache = GeneralUtility::makeInstance(PermissionCache::class);
         $permissionCache->flushCache();
     }
 
@@ -107,27 +104,21 @@ class DataHandlerHook
      * @param string $table
      * @param int $id
      * @param array $data
-     * @param mixed $res
-     * @param DataHandler $dataHandler
      * @return mixed
      */
-    public function checkRecordUpdateAccess($table, $id, $data, &$res, DataHandler $dataHandler)
+    public function checkRecordUpdateAccess($table, $id, $data, mixed &$res, DataHandler $dataHandler)
     {
         if ($table === 'pages') {
-
             /**
              * Case #1 - We are editing the page translation directly
              */
             if ($dataHandler->defaultValues['pages']['sys_language_uid'] ?? 0 > 0) {
-
                 $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('pages');
                 $queryBuilder->getRestrictions()
                     ->removeAll()
                     ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
                 $languageParent = $queryBuilder->select('l10n_parent')
-                    ->from('pages')
-                    ->where($queryBuilder->expr()->eq('uid', (int)$id))
-                    ->execute()
+                    ->from('pages')->where($queryBuilder->expr()->eq('uid', (int) $id))->executeQuery()
                     ->fetchColumn();
 
                 if ($languageParent) {
@@ -138,8 +129,8 @@ class DataHandlerHook
             /**
              * Case #2 - We are editing the page in default language, so translation gets updated too
              */
-            if(array_key_exists('uid', $dataHandler->checkValue_currentRecord)) {
-                $currentRecordUid = (integer)$dataHandler->checkValue_currentRecord['uid'];
+            if (array_key_exists('uid', $dataHandler->checkValue_currentRecord)) {
+                $currentRecordUid = (int) $dataHandler->checkValue_currentRecord['uid'];
                 if ($currentRecordUid != 0 && $currentRecordUid != $id) {
                     return true;
                 }

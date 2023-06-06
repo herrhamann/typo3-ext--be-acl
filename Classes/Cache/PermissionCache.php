@@ -1,8 +1,12 @@
 <?php
+
 namespace JBartels\BeAcl\Cache;
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use JBartels\BeAcl\Exception\RuntimeException;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Cache\CacheManager;
+use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
+use TYPO3\CMS\Core\SingletonInterface;
 /***************************************************************
  *  Copyright notice
  *
@@ -26,20 +30,19 @@ use JBartels\BeAcl\Exception\RuntimeException;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * A cache for storing permission data for a given Backend user
  */
 class PermissionCache implements SingletonInterface
 {
-
-    const CACHE_IDENTIFIER_PERMISSIONS = 'tx_be_acl_permission_cache';
+    final public const CACHE_IDENTIFIER_PERMISSIONS = 'tx_be_acl_permission_cache';
 
     /**
      * The Backend user for which this cache stores the permissions
      *
-     * @var \TYPO3\CMS\Core\Authentication\BackendUserAuthentication
+     * @var BackendUserAuthentication
      */
     protected $backendUser;
 
@@ -53,17 +56,17 @@ class PermissionCache implements SingletonInterface
      *
      * @var array
      */
-    protected $permissionCacheFirstLevel = array();
+    protected $permissionCacheFirstLevel = [];
 
     /**
      * This cache will be used during single requests.
      *
-     * @var \TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
+     * @var FrontendInterface
      */
     protected $permissionCacheSecondLevel;
 
     /**
-     * @var \JBartels\BeAcl\Cache\TimestampUtility
+     * @var TimestampUtility
      */
     protected $timestampUtility;
 
@@ -86,12 +89,10 @@ class PermissionCache implements SingletonInterface
     /**
      * Updates the last permission update timestamp which makes all
      * previously stored caches invalid.
-     *
-     * @return void
      */
     public function flushCache()
     {
-        $this->permissionCacheFirstLevel = array();
+        $this->permissionCacheFirstLevel = [];
         $this->timestampUtility->updateTimestamp();
     }
 
@@ -101,10 +102,9 @@ class PermissionCache implements SingletonInterface
      * @param string $requestedPermissions
      * @return string|null If a cache entry is found the permissions clause will be returned, otherwise NULL
      */
-    public function getPermissionsClause($requestedPermissions)
+    public function getPermissionsClause($requestedPermissions): ?string
     {
-
-        if (!isset($this->backendUser)) {
+        if (! isset($this->backendUser)) {
             return null;
         }
 
@@ -127,8 +127,8 @@ class PermissionCache implements SingletonInterface
     /**
      * Sets the Backend user for which the cache entries will be managed.
      *
-     * @param \TYPO3\CMS\Core\Authentication\BackendUserAuthentication $backendUser The Backend user for which the
-     *     cache is managed
+     * @param BackendUserAuthentication $backendUser The Backend user for which the
+        cache is managed
      */
     public function setBackendUser($backendUser)
     {
@@ -136,7 +136,7 @@ class PermissionCache implements SingletonInterface
     }
 
     /**
-     * @param \TYPO3\CMS\Core\Cache\Frontend\FrontendInterface $permissionCache
+     * @param FrontendInterface $permissionCache
      */
     public function setPermissionCache($permissionCache)
     {
@@ -149,12 +149,10 @@ class PermissionCache implements SingletonInterface
      *
      * @param string $requestedPermissions
      * @param string $permissionsClause
-     * @return void
      */
     public function setPermissionsClause($requestedPermissions, $permissionsClause)
     {
-
-        if (!isset($this->backendUser)) {
+        if (! isset($this->backendUser)) {
             return;
         }
 
@@ -165,8 +163,8 @@ class PermissionCache implements SingletonInterface
 
         $cacheData = $this->getCacheDataForCurrentUser();
 
-        if (!$this->isValidCacheData($cacheData)) {
-            $cacheData = GeneralUtility::makeInstance('JBartels\\BeAcl\\Cache\\PermissionCacheData');
+        if (! $this->isValidCacheData($cacheData)) {
+            $cacheData = GeneralUtility::makeInstance(PermissionCacheData::class);
         }
 
         $cacheData->setPermissionClause($requestedPermissions, $permissionsClause);
@@ -185,12 +183,9 @@ class PermissionCache implements SingletonInterface
 
     /**
      * Retrieves the cache data from the cache.
-     *
-     * @return PermissionCacheData|null
      */
-    protected function getCacheDataForCurrentUser()
+    protected function getCacheDataForCurrentUser(): ?PermissionCacheData
     {
-
         $cacheIdentifier = $this->getCacheIdentifier();
         if ($this->permissionCacheSecondLevel->has($cacheIdentifier)) {
             return $this->permissionCacheSecondLevel->get($cacheIdentifier);
@@ -205,12 +200,11 @@ class PermissionCache implements SingletonInterface
      *
      * @param string $requestedPermissions
      * @return string
-     * @throws \JBartels\BeAcl\Exception\RuntimeException
+     * @throws RuntimeException
      */
     protected function getCacheIdentifier($requestedPermissions = '')
     {
-
-        if (!isset($this->backendUser)) {
+        if (! isset($this->backendUser)) {
             throw new RuntimeException('The Backend user needs to be initializes before the cache identifier can be generated.');
         }
 
@@ -221,7 +215,7 @@ class PermissionCache implements SingletonInterface
             $identifier .= ';' . $requestedPermissions;
         }
 
-        return static::CACHE_IDENTIFIER_PERMISSIONS . '_' . sha1( $identifier );
+        return static::CACHE_IDENTIFIER_PERMISSIONS . '_' . sha1($identifier);
     }
 
     /**
@@ -229,11 +223,11 @@ class PermissionCache implements SingletonInterface
      */
     protected function initializeRequiredClasses()
     {
-        /** @var \TYPO3\CMS\Core\Cache\CacheManager $cacheManager */
-        $cacheManager = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Cache\\CacheManager');
+        /** @var CacheManager $cacheManager */
+        $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
         $this->setPermissionCache($cacheManager->getCache('tx_be_acl_permissions'));
         /** @var TimestampUtility $timestampUtility */
-        $timestampUtility = GeneralUtility::makeInstance('JBartels\\BeAcl\\Cache\\TimestampUtility');
+        $timestampUtility = GeneralUtility::makeInstance(TimestampUtility::class);
         $this->setTimestampUtility($timestampUtility);
     }
 
@@ -245,8 +239,7 @@ class PermissionCache implements SingletonInterface
      */
     protected function isValidCacheData($cacheData)
     {
-
-        if (!isset($cacheData)) {
+        if (! isset($cacheData)) {
             return false;
         }
 
