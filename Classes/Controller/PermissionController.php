@@ -41,8 +41,6 @@ class PermissionController extends CorePermissionController
 
     protected int $id = 0;
 
-    protected string $returnUrl = '';
-
     protected int $depth;
 
     protected array $pageInfo = [];
@@ -56,15 +54,15 @@ class PermissionController extends CorePermissionController
             'beGroups' => BackendUtility::getGroupNames(),
             'depth' => $this->depth,
             'depthOptions' => $this->getDepthOptions(),
-            'depthBaseUrl' => $this->uriBuilder->buildUriFromRoute('system_BeuserTxPermission', [
+            'depthBaseUrl' => $this->uriBuilder->buildUriFromRoute('permissions_pages', [
                 'id' => $this->id,
                 'depth' => '${value}',
                 'action' => 'index',
             ]),
-            'editUrl' => $this->uriBuilder->buildUriFromRoute('system_BeuserTxPermission', [
+            'editUrl' => $this->uriBuilder->buildUriFromRoute('permissions_pages', [
                 'action' => 'edit',
             ]),
-            'returnUrl' => (string) $this->uriBuilder->buildUriFromRoute('system_BeuserTxPermission', [
+            'returnUrl' => (string) $this->uriBuilder->buildUriFromRoute('permissions_pages', [
                 'id' => $this->id,
                 'depth' => $this->depth,
                 'action' => 'index',
@@ -167,7 +165,7 @@ class PermissionController extends CorePermissionController
             'pageInfo' => $this->pageInfo,
             'returnUrl' => $this->returnUrl,
             'recursiveSelectOptions' => $this->getRecursiveSelectOptions(),
-            'formAction' => (string) $this->uriBuilder->buildUriFromRoute('system_BeuserTxPermission', [
+            'formAction' => (string) $this->uriBuilder->buildUriFromRoute('permissions_pages', [
                 'action' => 'update',
                 'id' => $this->id,
                 'depth' => $this->depth,
@@ -190,7 +188,8 @@ class PermissionController extends CorePermissionController
             ->select('*')
             ->from('tx_beacl_acl')->where($queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($this->id, \PDO::PARAM_INT)))->executeQuery();
         $pageAcls = [];
-        while ($result = $statement->fetch()) {
+
+        while ($result = $statement->fetchAssociative()) {
             $pageAcls[] = $result;
         }
 
@@ -222,11 +221,7 @@ class PermissionController extends CorePermissionController
         $tce->stripslashes_values = 0;
         $tce->start($data, []);
         $tce->process_datamap();
-
-        parent::updateAction($request);
-
-        return $this->responseFactory->createResponse(303)
-            ->withHeader('location', $this->returnUrl);
+       return parent::updateAction($request);
     }
 
     /*****************************
