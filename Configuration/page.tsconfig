@@ -1,5 +1,5 @@
 templates {
     typo3/cms-beuser {
-        1686066930 = jm/jungmut:Resources/Private
+        1686066930 = p2media/be-acl:Resources/Private
     }
 }
