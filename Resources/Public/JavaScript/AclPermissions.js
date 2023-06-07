@@ -105,30 +105,36 @@ AclPermissions.deleteACL = function ($element) {
  * update user and group information
  *
  * @param ACLid - ID of ACL
+ * @param typeVal
  * @param objectId - Selected object id
  */
 AclPermissions.updateUserGroup = function (ACLid, typeVal, objectId) {
     objectId = objectId || 0;
-    const $container = $(AclPermissions.options.containerSelector);
-    const pageID = $container.data('pageid');
-    const type = (typeVal == 1) ? 'group' : 'user';
+    const container = document.querySelector(AclPermissions.options.containerSelector);
+    const pageID = container.dataset.pageid;
+    const type = (typeVal === 1) ? 'group' : 'user';
 
-// get child nodes of user/group selector
-    const $selector = $('select[name="data[pages][' + pageID + '][perms_' + type + 'id]"]');
-// delete current object selector options
-    const $objSelector = $('select[name=data\[tx_beacl_acl\]\[' + ACLid + '\]\[object_id\]]');
-    $objSelector.empty();
+    // Get child nodes of user/group selector
+    const selector = document.querySelector(`select[name="data[pages][${pageID}][perms_${type}id]"]`);
+    // Delete current object selector options
+    const objSelector = document.querySelector(`select[name="data[tx_beacl_acl][${ACLid}][object_id]"]`);
+    while (objSelector.firstChild) {
+        objSelector.removeChild(objSelector.firstChild);
+    }
 
-// set new options on object selector
-    let $option, $clonedOption;
-    $selector.children().each(function () {
-// Filter out values without IDs
-        $option = $(this);
-        if ($option.val() > 0 && $option.text() !== '_cli_lowlevel') {
-            $clonedOption = $option.clone().removeAttr('selected').appendTo($objSelector);
+    // Set new options on object selector
+    let option, clonedOption;
+    Array.from(selector.children).forEach((child) => {
+        // Filter out values without IDs
+        option = child;
+        if (option.value > 0 && option.text !== '_cli_lowlevel') {
+            clonedOption = option.cloneNode(true);
+            clonedOption.removeAttribute('selected');
+            objSelector.appendChild(clonedOption);
         }
     });
 };
+
 
 /**
 
@@ -153,6 +159,7 @@ AclPermissions.initializeEvents = function () {
         })
         .find('.tx_beacl-edit-acl-row').each(function () {
         const acluid = $(this).data('acluid');
+        let checkboxGroupCheckbox;
         if (acluid) {
             checkboxGroupCheckbox = $(this).find('[data-checkbox-group]');
             currentACLs.push(acluid);

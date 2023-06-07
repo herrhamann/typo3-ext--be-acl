@@ -133,7 +133,7 @@ class UserAuthGroup
      * @param BackendUserAuthentication $that BE User Object
      * @return string Part of where clause. Prefix " AND " to this.
      */
-    public function getPagePermsClause($params, $that)
+    public function getPagePermsClause(array $params, BackendUserAuthentication $that): string
     {
         /** @var PermissionCache $permissionCache */
         $permissionCache = GeneralUtility::makeInstance(PermissionCache::class);

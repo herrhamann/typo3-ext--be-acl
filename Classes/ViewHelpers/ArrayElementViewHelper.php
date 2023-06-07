@@ -48,7 +48,7 @@ class ArrayElementViewHelper extends AbstractViewHelper
         $array = $arguments['array'];
         $key = $arguments['key'];
         $subKey = $arguments['subKey'];
-        $result = '';
+        $result = 0;
 
         if (is_array($array)) {
             $result = static::getValue($array, $key);
@@ -57,7 +57,7 @@ class ArrayElementViewHelper extends AbstractViewHelper
             }
         }
 
-        if (! is_scalar($result) && ! is_null($result)) {
+        if (! is_scalar($result)) {
             throw new Exception(
                 'Only scalar or null return values (string, int, float or double, null) are supported.',
                 1_382_284_105
@@ -66,7 +66,7 @@ class ArrayElementViewHelper extends AbstractViewHelper
         return $result;
     }
 
-    protected static function getValue($array, $key, $del = '.', $default = null)
+    protected static function getValue($array, $key, $del = '.', $default = 0) : int|array
     {
         try {
             $result = ArrayUtility::getValueByPath($array, (string) $key, '.');

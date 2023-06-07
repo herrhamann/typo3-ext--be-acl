@@ -375,6 +375,7 @@ class PermissionController extends CorePermissionController
     /**
      * Finds ACL permissions for specified page and its children recursively, given
      * the parent ACLs.
+     * @throws Exception
      */
     protected function traversePageTree_acl(array $parentACLs, int $pageId): void
     {
@@ -389,7 +390,7 @@ class PermissionController extends CorePermissionController
 
         $this->addAclMetaData($this->aclList[$pageId]);
 
-        while ($result = $statement->fetch()) {
+        while ($result = $statement->fetchAssociative()) {
             $aclData = [
                 'uid' => $result['uid'],
                 'permissions' => $result['permissions'],
@@ -423,25 +424,31 @@ class PermissionController extends CorePermissionController
         $statement = $queryBuilder
             ->select('uid')
             ->from('pages')->where($queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pageId, \PDO::PARAM_INT)))->executeQuery();
-        while ($result = $statement->fetch()) {
+        while ($result = $statement->fetchAssociative()) {
             $this->traversePageTree_acl($parentACLs, $result['uid']);
         }
     }
 
+    /**
+     * @throws \JsonException
+     */
     public function handleAjaxRequest(ServerRequestInterface $request): ResponseInterface
     {
         $parsedBody = $request->getParsedBody();
         $action = $parsedBody['action'] ?? null;
-        $response = parent::handleAjaxRequest($request);
+
+
 
         if ($action == 'delete_acl') {
-            $response = $this->deleteAcl($request, $response);
+            $response = $this->deleteAcl($request);
+        } else {
+            $response = parent::handleAjaxRequest($request);
         }
 
         return $response;
     }
 
-    protected function deleteAcl(ServerRequestInterface $request, ResponseInterface $response)
+    protected function deleteAcl(ServerRequestInterface $request): ResponseInterface
     {
         $GLOBALS['LANG']->includeLLFile('EXT:be_acl/Resources/Private/Languages/locallang_perm.xlf');
         $GLOBALS['LANG']->getLL('aclUsers');
@@ -450,7 +457,7 @@ class PermissionController extends CorePermissionController
         $aclUid = ! empty($postData['acl']) ? $postData['acl'] : null;
 
         if (! MathUtility::canBeInterpretedAsInteger($aclUid)) {
-            return $this->errorResponse($response, $GLOBALS['LANG']->getLL('noAclId'), 400);
+            return $this->htmlResponse($GLOBALS['LANG']->getLL('noAclId'), 400);
         }
         $aclUid = (int) $aclUid;
         // Prepare command map
@@ -467,11 +474,11 @@ class PermissionController extends CorePermissionController
             /** @var DataHandler $tce */
             $tce = GeneralUtility::makeInstance(DataHandler::class);
             $tce->stripslashes_values = 0;
-            $tce->start([], []);
+            $tce->start([], $cmdMap);
             $this->checkModifyAccess($this->table, $aclUid, $tce);
             $tce->process_cmdmap();
         } catch (\Exception $ex) {
-            return $this->errorResponse($response, $ex->getMessage(), 403);
+            return $this->htmlResponse($ex->getMessage(), 403);
         }
 
         $body = [
@@ -479,6 +486,8 @@ class PermissionController extends CorePermissionController
             'message' => $GLOBALS['LANG']->getLL('aclDeleted'),
         ];
         // Return result
+        $response = $this->responseFactory->createResponse()
+            ->withHeader('Content-Type', 'application/json; charset=utf-8');
         $response->getBody()->write(json_encode($body, JSON_THROW_ON_ERROR));
         return $response;
     }
@@ -488,7 +497,8 @@ class PermissionController extends CorePermissionController
         // Check modify access
         $modifyAccessList = $tcemainObj->checkModifyAccessList($table);
         // Check basic permissions and circumstances:
-        if (! isset($GLOBALS['TCA'][$table]) || $tcemainObj->tableReadOnly($table) || ! is_array($tcemainObj->cmdmap[$table]) || ! $modifyAccessList) {
+
+        if (! isset($GLOBALS['TCA'][$table]) || $tcemainObj->tableReadOnly($table) || ! ($tcemainObj->cmdmap[$table] ?? true) || ! $modifyAccessList) {
             throw new RuntimeException($GLOBALS['LANG']->getLL('noPermissionToModifyAcl'));
         }
 
