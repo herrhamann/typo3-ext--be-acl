@@ -1,8 +1,10 @@
 <?php
 
+use TYPO3\CMS\Core\Imaging\IconProvider\FontawesomeIconProvider;
+
 return [
     'tx_beacl-object-info' => [
-        'provider' => \TYPO3\CMS\Core\Imaging\IconProvider\FontawesomeIconProvider::class,
+        'provider' => FontawesomeIconProvider::class,
         'name' => 'info',
     ],
 ];

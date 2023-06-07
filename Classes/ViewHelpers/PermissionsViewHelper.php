@@ -20,10 +20,8 @@ use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Imaging\IconProvider\SvgIconProvider;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
-use TYPO3Fluid\Fluid\Core\ViewHelper\Exception;
 use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
 
 /**
@@ -34,7 +32,6 @@ use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
  */
 class PermissionsViewHelper extends AbstractViewHelper
 {
-
     use CompileWithRenderStatic;
 
     protected const MASKS = [1, 16, 2, 4, 8];
@@ -78,10 +75,10 @@ class PermissionsViewHelper extends AbstractViewHelper
             $icon .= '<button'
                 . ' aria-label="' . htmlspecialchars($label) . ', ' . htmlspecialchars($mode) . ', ' . htmlspecialchars($arguments['scope']) . '"'
                 . ' title="' . htmlspecialchars($label) . '"'
-                . ' data-page="' . htmlspecialchars((string)$arguments['pageId']) . '"'
-                . ' data-permissions="' . htmlspecialchars((string)$arguments['permission']) . '"'
+                . ' data-page="' . htmlspecialchars((string) $arguments['pageId']) . '"'
+                . ' data-permissions="' . htmlspecialchars((string) $arguments['permission']) . '"'
                 . ' data-who="' . htmlspecialchars($arguments['scope']) . '"'
-                . ' data-bits="' . htmlspecialchars((string)$mask) . '"'
+                . ' data-bits="' . htmlspecialchars((string) $mask) . '"'
                 . ' data-mode="' . htmlspecialchars($mode) . '"'
                 . ' class="btn btn-permission change-permission ' . htmlspecialchars($iconClass) . '">'
                 . $iconFactory->getIcon($iconIdentifier, Icon::SIZE_SMALL)->render(SvgIconProvider::MARKUP_IDENTIFIER_INLINE)
@@ -93,7 +90,7 @@ class PermissionsViewHelper extends AbstractViewHelper
 
     protected static function resolvePermissionLabel(int $mask): string
     {
-        if (!isset(self::$cachePermissionLabels[$mask])) {
+        if (! isset(self::$cachePermissionLabels[$mask])) {
             self::$cachePermissionLabels[$mask] = htmlspecialchars(self::getLanguageService()->sL(
                 'LLL:EXT:beuser/Resources/Private/Language/locallang_mod_permission.xlf:' . $mask,
             ));

@@ -35,18 +35,16 @@ class ArrayElementViewHelper extends AbstractViewHelper
         $this->registerArgument('subKey', 'string', 'If result of key access is an array, subkey can be used to fetch an element from this again', false, '');
     }
 
-      /**
+    /**
      * Return array element by key.
      *
      * @throws Exception
-     * @return string
      */
     public static function renderStatic(
         array $arguments,
         \Closure $renderChildrenClosure,
         RenderingContextInterface $renderingContext
-    ): string
-    {
+    ): string {
         $array = $arguments['array'];
         $key = $arguments['key'];
         $subKey = $arguments['subKey'];

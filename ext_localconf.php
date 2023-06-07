@@ -44,7 +44,6 @@ call_user_func(function () {
         DataHandlerHook::class
     ;
 
-    
     if (! isset($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['tx_be_acl_timestamp']['frontend'])) {
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['tx_be_acl_timestamp']['frontend'] =
             VariableFrontend::class
@@ -57,7 +56,6 @@ call_user_func(function () {
         ;
     }
 
-    
     if (! isset($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['tx_be_acl_permissions']['frontend'])) {
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['tx_be_acl_permissions']['frontend'] =
             VariableFrontend::class
