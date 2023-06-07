@@ -129,12 +129,12 @@ class PermissionController extends CorePermissionController
          */
         $this->buildACLtree(array_keys($userAcls), array_keys($groupAcls));
         $view->assign('aclList', $this->aclList);
-
         return $view->renderResponse('Permission/Index');
     }
 
     public function editAction(ModuleTemplate $view, ServerRequestInterface $request): ResponseInterface
     {
+
         $lang = $this->getLanguageService();
         $selectNone = $lang->sL('LLL:EXT:beuser/Resources/Private/Language/locallang_mod_permission.xlf:selectNone');
         $selectUnchanged = $lang->sL('LLL:EXT:beuser/Resources/Private/Language/locallang_mod_permission.xlf:selectUnchanged');
