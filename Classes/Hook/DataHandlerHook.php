@@ -119,7 +119,7 @@ class DataHandlerHook
                     ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
                 $languageParent = $queryBuilder->select('l10n_parent')
                     ->from('pages')->where($queryBuilder->expr()->eq('uid', (int) $id))->executeQuery()
-                    ->fetchColumn();
+                    ->fetchOne();
 
                 if ($languageParent) {
                     return $dataHandler->checkRecordUpdateAccess($table, $languageParent);
